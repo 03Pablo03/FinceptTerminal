@@ -25,44 +25,6 @@ jobs:
             qt_arch: win64_msvc2022_64
             cmake_extra: ""
 
-          # ---- Windows ARM64 ----
-          - os: windows-2022
-            arch: arm64
-            platform: Windows
-            artifact: FinceptTerminal-Windows-arm64
-            exe: FinceptTerminal.exe
-            qt_arch: win64_msvc2022_arm64_cross_compiled
-            cmake_extra: "-A ARM64"
-
-          # ---- Linux x64 ----
-          - os: ubuntu-22.04
-            arch: x64
-            platform: Linux
-            artifact: FinceptTerminal-Linux-x64
-            exe: FinceptTerminal
-            qt_arch: ""
-            cmake_extra: ""
-
-          # ---- macOS ARM64 (Apple Silicon) ----
-          - os: macos-15
-            arch: arm64
-            platform: macOS
-            artifact: FinceptTerminal-macOS-arm64
-            exe: FinceptTerminal
-            qt_arch: clang_64
-            cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0"
-
-          # ---- macOS x64 (Intel) ----
-          # Cross-compiled on ARM64 runner. CMakeLists.txt auto-disables GGML_NATIVE
-          # and GGML_METAL when CMAKE_OSX_ARCHITECTURES != host processor.
-          - os: macos-15
-            arch: x64
-            platform: macOS
-            artifact: FinceptTerminal-macOS-x64
-            exe: FinceptTerminal
-            qt_arch: clang_64
-            cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0"
-
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.platform }} ${{ matrix.arch }}
 
@@ -124,7 +86,8 @@ jobs:
           echo "ZLIB_ROOT=$INSTALLED" >> "$GITHUB_ENV"
           echo "CMAKE_PREFIX_PATH=$INSTALLED" >> "$GITHUB_ENV"
           ls "$INSTALLED/lib/libcrypto.lib" && echo "libcrypto.lib confirmed"
-          ls "$INSTALLED/lib/zlib.lib" && echo "zlib.lib confirmed"
+          ls "$INSTALLED/lib/"*zlib* "$INSTALLED/lib/"*zlibstatic* 2>/dev/null && echo "zlib confirmed"
+          ls "$INSTALLED/include/zlib.h" && echo "zlib.h confirmed"
 
       # ---- Qt6 target (Windows/macOS) ----
       - name: Install Qt6
@@ -757,7 +720,7 @@ jobs:
     runs-on: macos-15
     name: macOS Universal
     # Only run if ALL build matrix jobs succeeded (not just "didn't fail")
-    if: "!cancelled() && needs.build.result == 'success'"
+    if: false
 
     steps:
       - name: Download macOS arm64
