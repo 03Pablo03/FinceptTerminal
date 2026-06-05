@@ -134,6 +134,8 @@ jobs:
         if: (runner.os == 'Windows' && matrix.arch == 'x64') || runner.os == 'macOS'
         shell: bash
         working-directory: fincept-qt
+        env:
+          CI: ""
         run: |
           OPENSSL_ARG=""
           if [ -n "${OPENSSL_ROOT_DIR:-}" ]; then
@@ -175,6 +177,8 @@ jobs:
       - name: Build
         shell: bash
         working-directory: fincept-qt
+        env:
+          CI: ""
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel $(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 3)
 
       # ---- Verify binary ----
